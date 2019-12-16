@@ -48,7 +48,7 @@ class NewVisitorTest(unittest.TestCase):
         input_box = self.browser.find_element_by_id('id_new_item')
         self.assertEqual(
             input_box.get_attribute('placeholder'),
-            'Enter a  to-do item'
+            'Enter a to-do item'
         )
         # 她在一个文本框中输入了 “Buy peacock feathers”（购买孔雀羽毛）
         # allen的爱好是使用假蝇做饵钓鱼
