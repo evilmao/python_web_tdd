@@ -59,9 +59,10 @@ class NewVisitorTest(unittest.TestCase):
         input_box.send_keys(Keys.ENTER)
 
         table = self.browser.find_element_by_id('id_list_table')
-        rows = table.find_element_by_tag_name('tr')
+        rows = table.find_elements_by_tag_name('tr')
         self.assertTrue(
-            any(row.text == '1:By peacock feathers' for row in rows)
+            any(row.text == '1:By peacock feathers' for row in rows),
+            "New to-do item did not appear in table"
         )
 
         # 页面中又显示了一个文本框，可以输入其他的待办事项
