@@ -51,7 +51,7 @@ class NewVisitorTest(unittest.TestCase):
         # 待办事项表格中显示了“1: Buy peacock feathers
         input_box.send_keys(Keys.ENTER)
 
-        self.check_for_row_in_list_table('1:Buy peacock feathers')
+        self.check_for_row_in_list_table('1: Buy peacock feathers')
 
         # 页面中又显示了一个文本框，可以输入其他的待办事项
         # 她输入了“Use peacock feathers to make a fly”（使用孔雀羽毛做假蝇）
