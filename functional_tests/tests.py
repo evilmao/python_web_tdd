@@ -4,7 +4,7 @@
 functional test: 功能测试
 '''
 import unittest
-
+from django.test import  LiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 
@@ -12,7 +12,8 @@ options = webdriver.ChromeOptions()
 options.binary_location = "D:\soft\Google\Chrome\Application\chrome.exe"
 
 
-class NewVisitorTest(unittest.TestCase):
+class NewVisitorTest(LiveServerTestCase):
+    """使用LiveServerTestCase 隔离测试"""
 
     def setUp(self):
         self.browser = webdriver.Chrome(chrome_options=options)
@@ -31,6 +32,7 @@ class NewVisitorTest(unittest.TestCase):
         # allen听说有一个很酷的在线待办事项应用
         # 她去看了这个应用的首页
         self.browser.get('http://localhost:8000/lists/home_page/')
+        # self.browser.get(self.live_server_url)
 
         # 她注意到网页的标题和头部都包含“To-Do”这个词
         self.assertIn('To-Do', self.browser.title)  # ➎
@@ -73,5 +75,5 @@ class NewVisitorTest(unittest.TestCase):
         self.fail('Finish the test!')  # ➏
 
 
-if __name__ == '__main__':  # ➐
-    unittest.main(warnings='ignore')  # ➑
+# if __name__ == '__main__':  # ➐
+#     unittest.main(warnings='ignore')  # ➑
