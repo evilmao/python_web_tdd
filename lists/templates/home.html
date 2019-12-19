@@ -5,8 +5,15 @@
 </head>
 <body>
     <h1>Your To-Do</h1>
-    <input id="id_new_item" placeholder="Enter a to-do item"/>
+    <form method="POST">
+       <input name="item_text" id="id_new_item" placeholder="Enter a to-do item" />
+       <!--get 请求方式时,测试无法通过,此时csrf_token渲染不了模板里面-->
+       {% csrf_token %}
+    </form>
     <table id="id_list_table">
+       {% for item in items %}
+         <tr><td>{{ forloop.counter }}: {{ item.text }}</td></tr>
+       {% endfor %}
     </table>
 </body>
 </html>
