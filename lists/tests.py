@@ -16,13 +16,13 @@ class HomePageTest(TestCase):
         found = resolve('/lists/home_page/')
         self.assertEqual(found.func, home_page)
 
-    # def test_home_page_return_correct_html(self):
-    #     """测试home_page页面能返回正常的页面"""
-    #     request = HttpRequest()  # 创建了一个 HttpRequest 对象
-    #     response = home_page(request)  # 把这个 HttpRequest 对象传给 home_page 视图，得到响应。
-    #
-    #     expected_html = render_to_string('home.html')
-    #     self.assertEqual(response.content.decode(), expected_html)
+    def test_home_page_return_correct_html(self):
+        """测试home_page页面能返回正常的页面"""
+        request = HttpRequest()  # 创建了一个 HttpRequest 对象
+        response = home_page(request)  # 把这个 HttpRequest 对象传给 home_page 视图，得到响应。
+
+        expected_html = render_to_string('home.html')
+        self.assertEqual(response.content.decode(), expected_html)
 
     def test_home_page_can_save_a_POST_request(self):
         """测试home_page视图可以保存一个post请求"""
@@ -56,9 +56,9 @@ class HomePageTest(TestCase):
         request = HttpRequest()
         request.method = 'POST'
         request.POST['item_text'] = 'A new list item'
-
         # 执行代码
         response = home_page(request)
+        # 编写断言
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response['location'], '/lists/home_page/')
 
