@@ -31,7 +31,7 @@ class NewVisitorTest(LiveServerTestCase):
     def test_can_start_a_list_and_retrieve_it_later(self):
         # allen听说有一个很酷的在线待办事项应用
         # 她去看了这个应用的首页
-        self.browser.get('http://localhost:8000/lists/home_page/')
+        self.browser.get('http://localhost:8000/lists/')
         # self.browser.get(self.live_server_url)
 
         # 她注意到网页的标题和头部都包含“To-Do”这个词
