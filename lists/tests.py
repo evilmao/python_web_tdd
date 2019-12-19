@@ -38,16 +38,16 @@ class HomePageTest(TestCase):
         new_item = Item.objects.first()  # ➋
         self.assertEqual(new_item.text, 'A new list item')  # ➌
 
-        # 编写断言
-        # self.assertIn('A new list item', response.content.decode())
-        # expected_html = render_to_string(
-        #     'home.html',
-        #     {'new_item_text': 'A new list item'}
-        # )
+        #编写断言
+        self.assertIn('A new list item', response.content.decode())
+        expected_html = render_to_string(
+            'home.html',
+            {'new_item_text': 'A new list item'}
+        )
 
-        # self.assertEqual(response.content.decode(), expected_html)
-        # self.assertEqual(response.status_code,302)  # post请求成功后重定向,所以判断状态码是否是302
-        # self.assertEqual(response['location'], '/lists/home_page/') # 获取重定向的url
+        self.assertEqual(response.content.decode(), expected_html)
+        self.assertEqual(response.status_code,302)  # post请求成功后重定向,所以判断状态码是否是302
+        self.assertEqual(response['location'], '/lists/home_page/') # 获取重定向的url
 
 
     def test_home_page_redirects_after_POST(self):
