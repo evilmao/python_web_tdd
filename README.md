@@ -40,3 +40,9 @@ python web 驱动测试代码demo及各章知识点
 #### 6.2.2 REST API
 
 "表现层状态转化"（Representational State Transfer，REST）是 Web 设计的一种方式，经 常用来引导基于 Web 的 API 设计.
+
+### 6.3 每一个视图函数对应一个模板(html)
+
+1. assertTemplateUsed 是 Django 测试客户端提供的强大方法之一, 用来判断返回的视图对象是否属于某个存在的模板文件
+    `assertTemplateUsed(response, 'base.html')`
+2.
