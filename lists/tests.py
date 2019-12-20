@@ -23,42 +23,6 @@ class HomePageTest(TestCase):
     #     expected_html = render_to_string('home.html')
     #     self.assertEqual(response.content.decode(), expected_html)
 
-    def test_home_page_can_save_a_POST_request(self):
-        """测试home_page视图可以保存一个post请求"""
-        # 设置测试背景
-        request = HttpRequest()
-        request.method = 'POST'
-        request.POST['item_text'] = 'A new list item'
-
-        # 执行代码
-        response = home_page(request)
-        # 编写断言
-        self.assertEqual(Item.objects.count(), 1)
-        new_item = Item.objects.first()  # ➋
-        self.assertEqual(new_item.text, 'A new list item')  # ➌
-
-        self.assertEqual(response.status_code,302)  # post请求成功后重定向,所以判断状态码是否是302
-        self.assertEqual(response['location'], '/lists/the-only-list-in-the-world/') # 获取重定向的url
-
-
-    def test_home_page_redirects_after_POST(self):
-        """测试POST重定向"""
-        # 将上面的测试拆分成两个测试: 原则,一个测试只测试一件事儿,即只有一断言
-        request = HttpRequest()
-        request.method = 'POST'
-        request.POST['item_text'] = 'A new list item'
-        # 执行代码
-        response = home_page(request)
-        # 编写断言
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response['location'], '/lists/the-only-list-in-the-world/')
-
-    def test_home_page_only_saves_items_when_necessary(self):
-        '''测试仅当需要时保存数据到模型'''
-        request = HttpRequest()
-        home_page(request)
-        self.assertEqual(Item.objects.count(), 0)
-
 
 class ItemModelTest(TestCase):
 
@@ -100,4 +64,39 @@ class ListViewTest(TestCase):
     def test_users_list_template(self):
         """检查是否使用了不同的模板"""
         response = self.client.get('/lists/the-only-list-in-the-world/')
-        self.assertTemplateUsed(response,'list.html')
+        self.assertTemplateUsed(response, 'list.html')
+
+
+class NewListTest(TestCase):
+
+    # def test_home_page_can_save_a_POST_request(self):
+    # 重命名
+    def test_saving_a_Post_request(self):
+        """测试可以保存一个post请求(新的视图)"""
+        ''''
+        # 设置测试背景
+          request = HttpRequest()
+          request.method = 'POST'
+          request.POST['item_text'] = 'A new list item'
+        # 使用django 测试客户端 self.client
+        '''
+        self.client.post(
+            "/lists/new",
+            data={'item_text': 'A new list item'}
+        )
+
+        # 编写断言
+        self.assertEqual(Item.objects.count(), 1)
+        new_item = Item.objects.first()  # ➋
+        self.assertEqual(new_item.text, 'A new list item')  # ➌
+
+    def test_redirects_after_POST(self):
+        """测试POST重定向"""
+        # 使用django 测试客户端 self.client
+        response = self.client.post(
+            "/lists/new",
+            data={'item_text': 'A new list item'}
+        )
+        # 编写断言
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response,'/lists/the-only-list-in-the-world/')
