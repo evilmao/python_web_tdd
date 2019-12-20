@@ -9,5 +9,8 @@ __all__ = ["urlpatterns"]
 app_name = "lists"
 
 urlpatterns = [
-    path('home_page/', views.home_page, name='home'),
+    path('', views.home_page, name='home-page'),
+    path('<int:list_id>/',views.view_list, name='view_list'),
+    path('new',views.new_list, name='new_list'),
+    path('<int:list_id>/add_item',views.add_item,name='add_item'),
 ]

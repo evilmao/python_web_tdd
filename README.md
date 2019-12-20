@@ -9,173 +9,118 @@ python web 驱动测试代码demo及各章知识点
 - [第三章:使用单元测试测试简单的页面](https://github.com/evilmao/python_web_tdd/tree/v3.1)
 - [第四章:编写这些测试有什么用](https://github.com/evilmao/python_web_tdd/tree/v4.0)
 - [第五章:保存用户输入到数据库](https://github.com/evilmao/python_web_tdd/tree/v5.0)
+- [第六章:完成简单的可用网站](https://github.com/evilmao/python_web_tdd/tree/v6.0)
 
 ### 本章知识点
-**当前位于第 [5](https://github.com/evilmao/python_web_tdd/tree/v5.0) 章**
+**当前位于第 [6](https://github.com/evilmao/python_web_tdd/tree/v6.0) 章**
 
-### 5.1 代码错误几种调试方式
+*上一章遗留的问题:功能测试运行结束后的清理,每运行一次测试,都会向数据库提交一次数据???*
 
-1. 添加 print 语句，输出页面中当前显示的文本是什么
-2. 改进错误消息，显示当前状态的更多信息
-3. 亲自手动访问网站(web)
-4. 在测试执行过程中使用 time.sleep 暂停
 
-### 5.2 CSRF 错误
-1. “跨站请求伪造”（Cross-Site Request Forgery，CSRF）漏洞
-2. Django 针对 CSRF 的保护措施是在生成的每个表单中放置一个自动生成的令牌，通过这个 令牌判断 POST 请求是否来自同一个网站。
-3. Django解决POST请求, 使用“模板标签” （template tag）添加 CSRF 令牌--- `{% csrf_token %}`,渲染模板时，Django 会把这个模板标签替换成一个 <input type="hidden"> 元
+### 6.1 确保功能测试之间相互隔离
+如何隔离测试。运行功能测试后待办事项一直 存在于数据库中，这会影响下次测试的结果。
 
-### 5.3 编写测试函数格式(建议)
+运行单元测试时，Django 的测试运行程序会自动创建一个全新的测试数据库（和应用真正 使用的数据库不同），运行每个测试之前都会清空数据库，等所有测试都运行完之后，再 删除这个数据库。但是功能测试目前使用的是应用真正使用的数据库 db.sqlite3。
 
-1. “设置配置 - 执行代 码 - 编写断言”是单元测试的典型结构。
-2. 如下为实例代码
+- 解决方法之一是自己动手，在 functional_tests.py 中添加执行清理任务的代码。 这样的任务最适合在 setUp 和 tearDown 方法中完成。
+- 从 1.4 版开始，Django 提供的一个新类，LiveServerTestCase，它可以代我们完成这 一任务
+
+#### 只运行单元测试
+1. 如果执行 manage.py test 命令，Django 会运行功能测试和单元测试
+2. 如果只想运行单元测试，可以指定只运行 lists 应用中的测试`python manage.py test lists`
+3. 运行功能测试: `python manage.py test functional_tests`
+
+
+### 6.2 必要时做少量的设计
+
+1. 敏捷理念则认为，在实践中解决问题比理论分析能学到更多，而且让应用尽 早接受真实用户的检验效果更好
+2. 无需花这么多时间提前设计，而要尽早把最简可用的应 用放出来，根据实际使用中得到的反馈逐步向前推进设计
+3. 守敏捷理念的另一个信条:`YAGNI`(You aint gonna need it)简称（“你不需要这个”）,抵御内心某个想法并想把他创造出来的冲动.
+
+#### 6.2.2 REST API
+
+"表现层状态转化"（Representational State Transfer，REST）是 Web 设计的一种方式，经 常用来引导基于 Web 的 API 设计.
+
+### 6.3 每一个视图函数对应一个模板(html)
+
+1. assertTemplateUsed 是 Django 测试客户端提供的强大方法之一, 用来判断返回的视图对象是否属于某个存在的模板文件
+    `assertTemplateUsed(response, 'base.html')`
+
+### 6.4 重构
+
+1. 不同类型的测试放进不同的类中.
+
+### 6.5 数据库表之间的关联
+
+1. 使用外键实现的关联:
+    > 若想保存对象之间的关系，要告诉 Django 两个类之间的关系，这种关系使用 ForeignKey 字段表示：
     ```python
-    def test_home_page_display_all_list_items(self):
-        """测试首页展示所有条目"""
-        # 设置测试背景
-        Item.objects.create(text='itemey 1')
-        Item.objects.create(text='itemey 2')
-        # 执行代码
-        request = HttpRequest()
-        response = home_page(request)
-        # 编写断言
-        self.assertIn('itemey 1', response.content.decode())
-        self.assertIn('itemey 2', response.content.decode())
+    from django.db import models
+
+    class List(models.Model):
+        pass
+
+
+    class Item(models.Model):
+        text = models.TextField(default='')
+        list = models.ForeignKey(List, default=None,on_delete=True) # 使用Foreignkey关联
     ```
+2. django在执行迁移文件后，如果想删除迁移文件，重新修改，则需要删除生成的迁移文件
+    `rm lists/migrations/0004_item_list.py`,然后重新执行迁移.
 
-### 5.4 Python变量传入模板中渲染
+3. **django2.0中**`ForeignKey`参数'on_delete'为必填参数，关于各参数的说明如下：
+    1. `on_delete=None`                # 删除关联表中的数据时,当前表与其关联的field的行为
+    2. `on_delete=models.CASCADE`,     # 删除关联数据,与之关联的表也删除
+    3. `on_delete=models.DO_NOTHING`,  # 删除关联数据,什么也不做
+    4. `on_delete=models.PROTECT`      # 删除关联数据,引发错误ProtectedError
+    5. `models.ForeignKey('关联表', on_delete=models.SET_NULL, blank=True, null=True)`
+    6. `on_delete=models.SET_NULL`,    # 删除关联数据,与之关联的值设置为null（前提FK字段需要设置为可空,一对一同理）
+    7. `models.ForeignKey('关联表', on_delete=models.SET_DEFAULT, default='默认值')`
+    8. `on_delete=models.SET_DEFAULT`, # 删除关联数据,与之关联的值设置为默认值（前提FK字段需要设置默认值,一对一同理）
+    9. `on_delete=models.SET`,         # 删除关联数据,
 
-1. 再HTML中使用 `{{ ... }}`，它会以字符串的形式显示对象
-2. 如 ` <tr><td>{{ new_item_text }}</td></tr>`, 其中`new_item_text`就是python视图函数中,需要传递的变量.
-3. `render_to_string`使用: 第一个参数是html文件,第二个是需要传递到模板文件的变量,返回的是html源文件
+### 6.4 视图函数返回对象
+
+1. 示例代码
     ```python
-    expected_html = render_to_string(
-        'home.html',
-        {'new_item_text':  'A new list item'}
-    )
+    def test_passes_correct_list_to_template(self):
+        other_list = List.objects.create()
+        correct_list = List.objects.create()
+        response = self.client.get('/lists/{}/'.format (correct_list.id))
+        self.assertEqual(response.context['list'], correct_list)
     ```
-
-### 5.5 遇红 / 变绿 / 重构和三角法
-
-"单元测试/编写代码"循环有时也叫 "遇红/变绿/重构"
-
-- 先写一个会失败的单元测试（遇红）
-- 编写尽可能简单的代码让测试通过（变绿），就算作弊也行；
-- 重构，改进代码，让其更合理
-
-*在重构阶段应该做些什么呢？*
-
-- 一种方法: 消除重复如果测试中使用了神奇常量（例如列表项目前面的“1:”),而 且应用代码中也用了这个常量，这就算是重复, 此时就应该重复
-- 三角法:
-    如果编写无法让你满意的作弊代码（例如返回一个神奇的常量）就能让测试通过,就 再写一个测试，强制自己编写更好的代码
-
-### 5.6 事不过三，三则重构
-
-> 编程中有个原则叫作"不要自我重复"（Don’t Repeat Yourself， DRY），按照真言"事不过三，三则重构"的说法，运用这个原则。复制粘贴一次，可能 还不用删除重复，但如果复制粘贴了三次，就该删除重复了。
+    视图函数返回为HttpResponse对象，通过`对象.context` 可以获取视图函数传递给前端的上下文。response.context 表示要传入 render 函数的上下文.
 
 
-### 5.7 Django ORM
+### 6.5 ORM反向查询
 
-> "对象关系映射器"（Object-Relational Mapper，ORM）是一个数据抽象层，描述存储在数 据库中的表、行和列.
+1. 关于反向查询概念：一对多关联的两个表（model）,存在ForeignKey字段所在的model的我们成为正向表，而关联的model称为反向表。
+    如下：
+    ```python
+    # coding:utf-8
+    from django.db import models
 
-在 ORM 的概念中，`类对应数据库中的表，属性对应列，类的单个实例表示数据库中的一 行数据`
+    # Create your models here.
 
-**ORM一些函数**
-
-1. `M.objects.all()` 获取M所有的数据, 结果是一个类 似列表的对象，叫 QuerySet
-2. `M.save()`先创建一个对象，再为一些属 性赋值，然后调用 .save() 函数.
-3. `M.objects.all().count()` 获取查询实例条数
-4. `M.objects.first()`获取第一个数据文件.
-
-### 5.8 Django数据库迁移
-
-> 在 Django 中，ORM 的任务是模型化数据库。创建数据库其实是由另一个系统负责的，叫 作“迁移”（migration）。迁移的任务是，根据你对 models.py 文件的改动情况，添加或删 除表和列。
-
-1. 数据库迁移执行指令 `python manage.py makemigrations `
-2. 使用迁移创建生产数据库
-    1. 默认情况下，Django 把数据库保存为 db.sqlite3, Django 的 settings.py 中
-    2. `python3 manage.py migrate `
+    class List(models.Model):
+        pass
 
 
-**更好的单元测试实践方法：一个测试只测试一件事**
-
-> 良好的单元测试实践方法要求，一个测试只能测试一件 事。因为这样便于查找问题。如果一个测试中有多个断言，一旦前面的断言导致测试失 败，就无法得知后面的断言情况如何
-
-### 5.9 Django 模板标签使用
-
-django 有很便于使用的模板标签总结如下
-
-1. 变量
-    1. 格式：`{{ variable }}`
-2. 过滤器
-    1. 格式：`{{ name|lower }}`
-    2. 过滤器是可以链式连接的，如`{{ text|escape|linebreaks }}`
-    3. 过滤器也是可以带参数的，如`{{ bio|truncatewords:30 }}`
-    4. 过滤器参数如果有空格必须引号加起来，如`{{ list|join:", " }}`
-3. 标签
-    1. 格式：`{% tag %}`
-    2. 一些需要开始的tag和结束的tag，例如：{% tag %} ... tag contents ... {% endtag %}
-    3. django 内置常用标签
-        1. for循环: `{% for i in item_list %}...{% endfor %}`
-        2. if 判断: `{% if %}...{% else %}...{% endif %}`
-4. 注释
-    1. `格式：{# comment #}`
-5. 模板继承
-    1. 父模板`base.html`
-
-        ```html
-        <!DOCTYPE html>
-        <html lang="zh">
-        <head>
-            <link rel="stylesheet" href="style.css" />
-            <title>{% block title %}My home page{% endblock %}</title>
-        </head>
-
-        <body>
-            <div id="nav">
-                {% block nav %}
-                <ul>
-                    <li><a href="/">Home</a></li>
-                    <li><a href="/Article/">Blog</a></li>
-                </ul>
-                {% endblock %}
-            </div>
-
-            <div id="content">
-                {% block content %}{% endblock %}
-            </div>
-        </body>
-        </html>
-       ```
-    2. 子模版
-        ```HTML
-        {% extends "base.html" %}
-
-        {% block title %}My  blog{% endblock %}
-
-        {% block content %}
-            {% for article in articles %}
-                <h2>{{ article.title }}</h2>
-                <p>{{ article.body }}</p>
-            {% endfor %}
-        {% endblock %}
-        ```
-    3. 如果在模板中使用了`{% extends %}`,如果需要使用父模板中的block中的内容可以使用{{ block.super }}
-模板的tag不要重名,django默认加入了 auto-escaping 防止XSS,取消的话，针对变量可以加入safe，如{{variable|safe}}
-
-    4. 更多内置标签参见官方文档
+    class Item(models.Model):
+        text = models.TextField(default="")
+        list = models.ForeignKey('List', on_delete=models.CASCADE)
+    ```
+    1. 上面两个模型，其中ForeignKey存在于Item 模型中，所以通过Item查询list称之`正向查询`: `Item.objects.filter(list=list_)`
+    2. List模型是被关联的模型，称为反向表，即`一个List下面可以包含多个item`,所以通过List表来查询item的条目称为反向查询： `List.object.get(id=1).item_set().all()`
+    3. 反向查询同样可以用于模板标签中 `{% for item in list.item_set.all %}...{% endfor %}`
 
 
 ### 总结
-- 回归
-  > 新添加的代码破坏了应用原本可以正常使用的功能。
--  意外失败
-    > 测试在意料之外失败了。这意味着测试中有错误，或者测试帮我们发现了一个回 归，因此要在代码中修正。
--  遇红 / 变绿 / 重构
-    > 描述 TDD 流程的另一种方式。先编写一个测试看着它失败（遇红），然后编写代码 让测试通过（变绿），最后重构，改进实现方式。
-- 三角法
-    >添加一个测试，专门为某些现有的代码编写用例，以此推断出普适的实现方式（在 此之前的实现方式可能作弊了）。
-- 事不过三， 三则重构
-    >判断何时删除重复代码时使用的经验法则。如果两段代码很相似，往往还要等到第 三段相似代码出现，才能确定重构时哪一部分是真正共通、可重用的。
-- 记在便签上的待办事项清单
-    >在便签上记录编写代码过程中遇到的问题，等手头的工作完成后再回过头来解决
+
+**有用的 TDD 概念和经验法则**
+- 测试隔离和全局状态
+   - 不同的测试之间不能彼此影响，也就是说每次测试结束后都要还原所做的永久性操 作。Django 的测试运行程序可以帮助我们创建一个测试数据库，每次测试结束后都 会清空数据库（详情参见第 19 章）。
+- 从一个可运行状态到另一个可运行状态（又叫测试山羊与重构猫）
+  - 本能经常驱使我们直接动手一次修正所有问题，但如果不小心，最终可能像重构猫 一样，改动了很多代码但都不起作用。测试山羊建议我们一次只迈一步，从一个可 运行状态走到另一个可运行状态。
+-  YAGNI
+  - "You ain’t gonna need it"（你不需要这个）的简称，劝诫你不要受诱惑编写当时看 起来可能有用的代码。很有可能你根本用不到这些代码，或者没有准确预见未来的 需求。第 18 章给出了一种方法，可以让你避免落入这个陷阱
