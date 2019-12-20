@@ -45,4 +45,7 @@ python web 驱动测试代码demo及各章知识点
 
 1. assertTemplateUsed 是 Django 测试客户端提供的强大方法之一, 用来判断返回的视图对象是否属于某个存在的模板文件
     `assertTemplateUsed(response, 'base.html')`
-2.
+
+### 6.4 重构
+
+1. 不同类型的测试放进不同的类中.
