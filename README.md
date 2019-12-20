@@ -79,4 +79,37 @@ python web 驱动测试代码demo及各章知识点
     8. `on_delete=models.SET_DEFAULT`, # 删除关联数据,与之关联的值设置为默认值（前提FK字段需要设置默认值,一对一同理）
     9. `on_delete=models.SET`,         # 删除关联数据,
 
+### 6.4 视图函数返回对象
 
+1. 示例代码
+    ```python
+    def test_passes_correct_list_to_template(self):
+        other_list = List.objects.create()
+        correct_list = List.objects.create()
+        response = self.client.get('/lists/{}/'.format (correct_list.id))
+        self.assertEqual(response.context['list'], correct_list)
+    ```
+    视图函数返回为HttpResponse对象，通过`对象.context` 可以获取视图函数传递给前端的上下文。response.context 表示要传入 render 函数的上下文.
+
+
+### 6.5 ORM反向查询
+
+1. 关于反向查询概念：一对多关联的两个表（model）,存在ForeignKey字段所在的model的我们成为正向表，而关联的model称为反向表。
+    如下：
+    ```python
+    # coding:utf-8
+    from django.db import models
+
+    # Create your models here.
+
+    class List(models.Model):
+        pass
+
+
+    class Item(models.Model):
+        text = models.TextField(default="")
+        list = models.ForeignKey('List', on_delete=models.CASCADE)
+    ```
+    1. 上面两个模型，其中ForeignKey存在于Item 模型中，所以通过Item查询list称之`正向查询`: `Item.objects.filter(list=list_)`
+    2. List模型是被关联的模型，称为反向表，即`一个List下面可以包含多个item`,所以通过List表来查询item的条目称为反向查询： `List.object.get(id=1).item_set().all()`
+    3. 反向查询同样可以用于模板标签中 `{% for item in list.item_set.all %}...{% endfor %}`
