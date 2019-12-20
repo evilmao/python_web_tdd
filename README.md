@@ -49,3 +49,34 @@ python web 驱动测试代码demo及各章知识点
 ### 6.4 重构
 
 1. 不同类型的测试放进不同的类中.
+
+### 6.5 数据库表之间的关联
+
+1. 使用外键实现的关联:
+    > 若想保存对象之间的关系，要告诉 Django 两个类之间的关系，这种关系使用 ForeignKey 字段表示：
+    ```python
+    from django.db import models
+
+    class List(models.Model):
+        pass
+
+
+    class Item(models.Model):
+        text = models.TextField(default='')
+        list = models.ForeignKey(List, default=None,on_delete=True) # 使用Foreignkey关联
+    ```
+2. django在执行迁移文件后，如果想删除迁移文件，重新修改，则需要删除生成的迁移文件
+    `rm lists/migrations/0004_item_list.py`,然后重新执行迁移.
+
+3. **django2.0中**`ForeignKey`参数'on_delete'为必填参数，关于各参数的说明如下：
+    1. `on_delete=None`                # 删除关联表中的数据时,当前表与其关联的field的行为
+    2. `on_delete=models.CASCADE`,     # 删除关联数据,与之关联的表也删除
+    3. `on_delete=models.DO_NOTHING`,  # 删除关联数据,什么也不做
+    4. `on_delete=models.PROTECT`      # 删除关联数据,引发错误ProtectedError
+    5. `models.ForeignKey('关联表', on_delete=models.SET_NULL, blank=True, null=True)`
+    6. `on_delete=models.SET_NULL`,    # 删除关联数据,与之关联的值设置为null（前提FK字段需要设置为可空,一对一同理）
+    7. `models.ForeignKey('关联表', on_delete=models.SET_DEFAULT, default='默认值')`
+    8. `on_delete=models.SET_DEFAULT`, # 删除关联数据,与之关联的值设置为默认值（前提FK字段需要设置默认值,一对一同理）
+    9. `on_delete=models.SET`,         # 删除关联数据,
+
+
