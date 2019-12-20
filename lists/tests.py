@@ -2,7 +2,7 @@ from django.http import HttpRequest
 from django.test import TestCase
 from django.urls import resolve
 
-from .models import Item
+from .models import Item, List
 from .views import home_page
 
 
@@ -28,13 +28,21 @@ class ItemModelTest(TestCase):
 
     def test_saving_and_retrieving_items(self):
         """测试Item model保存一条数据"""
-        first_item = Item()  # 实例化一个model
+
+        # 实例化List模板
+        list_ = List()
+        list_.save()
+
+        # 实例化Item模型，并插入数据
+        first_item = Item()                             # 实例化一个Item 数据模型
         first_item.text = 'The first (ever) list item'  # 定义model的一个字段text并赋值
-        first_item.save()  # 保存数据
+        first_item.list = list_                         # 为Item实例的list（字段）赋值
+        first_item.save()                               # 保存数据
 
         # 插入第二条
         second_item = Item()
         second_item.text = 'Item the second'
+        second_item.list = list_
         second_item.save()
 
         # 获取已插入的数据数目
@@ -45,7 +53,10 @@ class ItemModelTest(TestCase):
         first_saved_item = saved_items[0]
         second_saved_item = saved_items[1]
         self.assertEqual(first_saved_item.text, 'The first (ever) list item')
+        self.assertEqual(first_saved_item.list, list_)                      # 检查item第一次插入数据时，是否成功关联list
         self.assertEqual(second_saved_item.text, 'Item the second')
+        self.assertEqual(second_saved_item.list, list_)                      # 检查item第二次插入数据时，是否成功关联list
+
 
 
 class ListViewTest(TestCase):
