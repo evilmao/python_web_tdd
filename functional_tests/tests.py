@@ -54,7 +54,7 @@ class NewVisitorTest(LiveServerTestCase):
         # 这个页面的待办事项清单中显示了“1: Buy peacock feathers”
 
         input_box.send_keys(Keys.ENTER)
-        edith_list_url = self.browser.current_url  # 获取当前页面url
+        edith_list_url = self.browser.current_url      # 获取当前页面url
         self.assertRegex(edith_list_url, '/lists/.+')  # ➊ 使用正则匹配:，检查字符串是否和正则表达式匹
 
         self.check_for_row_in_list_table('1: Buy peacock feathers')
@@ -72,7 +72,7 @@ class NewVisitorTest(LiveServerTestCase):
 
         # 现在一个叫作弗朗西斯的新用户访问了网站
 
-        ## 我们使用一个新浏览器会话 ##
+        ## 我们使用一个新浏览器会话
         ## 确保allen的信息不会从cookie中泄露出来 #➊
         self.browser.quit()
         self.browser = webdriver.Chrome(chrome_options=options)
@@ -90,7 +90,7 @@ class NewVisitorTest(LiveServerTestCase):
         input_box.send_keys('Buy milk')
         input_box.send_keys(Keys.ENTER)
 
-        # faily获得了他的唯一URL
+        # 费力获得了他的唯一URL
         faily_list_url = self.browser.current_url
         self.assertRegex(faily_list_url, '/lists/.+')
         self.assertNotEqual(faily_list_url, edith_list_url)
@@ -100,8 +100,8 @@ class NewVisitorTest(LiveServerTestCase):
         self.assertNotIn('Buy peacock feathers', page_text)
         self.assertIn('Buy milk', page_text)
 
-
         # 两人都很满意，去睡觉了
+        self.fail()
 
 
 # if __name__ == '__main__':  # ➐
