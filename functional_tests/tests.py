@@ -18,6 +18,7 @@ class NewVisitorTest(LiveServerTestCase):
     def setUp(self):
         self.browser = webdriver.Chrome(chrome_options=options)
         self.browser.implicitly_wait(3)  # 隐式等待几秒,以便页面加载完成
+        self.home_page_url = 'http://localhost:8000/lists/'
 
     def tearDown(self):
         self.browser.quit()
@@ -27,6 +28,19 @@ class NewVisitorTest(LiveServerTestCase):
         table = self.browser.find_element_by_id('id_list_table')
         rows = table.find_elements_by_tag_name('tr')
         self.assertIn(row_text, [row.text for row in rows])
+
+    def test_layout_and_styling(self):
+        # allen访问首页
+        self.browser.get(self.home_page_url)
+        self.browser.set_window_size(1024,768)  # 设置浏览器窗口的位置
+
+        # 他看到输入框完美地居中显示
+        input_box= self.browser.find_element_by_id('id_new_item')  # 找到输入框位置
+        self.assertAlmostEqual(
+            input_box.location['x'] + input_box.size['width'] / 2,
+            512,
+            delta=10
+        )
 
     def test_can_start_a_list_and_retrieve_it_later(self):
         # allen听说有一个很酷的在线待办事项应用
@@ -96,7 +110,7 @@ class NewVisitorTest(LiveServerTestCase):
         self.assertNotEqual(faily_list_url, edith_list_url)
 
         # 这个页面还是没有allen的清单
-        page_text = self.browser.find_element_by_id('body').text
+        page_text = self.browser.find_element_by_tag_name('body').text
         self.assertNotIn('Buy peacock feathers', page_text)
         self.assertIn('Buy milk', page_text)
 
