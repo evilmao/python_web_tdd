@@ -1,14 +1,5 @@
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>To-Do lists</title>
-</head>
-<body>
-    <h1>Start a new To-Do list</h1>
-    <form method="POST" action="/lists/new">
-       <input name="item_text" id="id_new_item" placeholder="Enter a to-do item" />
-       <!--get 请求方式时,测试无法通过,此时csrf_token渲染不了模板里面-->
-       {% csrf_token %}
-    </form>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block header_text %}Start a new To-Do list{% endblock %}
+
+{% block form_action %}/lists/new{% endblock %}
