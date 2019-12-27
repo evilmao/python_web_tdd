@@ -1,4 +1,4 @@
-<html>
+<html xmlns="http://www.w3.org/1999/html">
 <head>
   <meta charset="UTF-8">
   <title>To-Do lists</title>
@@ -6,9 +6,11 @@
 <body>
     <h1>Start a new To-Do list</h1>
     <form method="POST" action="/lists/new">
+     <p style="text-align: center;">
        <input name="item_text" id="id_new_item" placeholder="Enter a to-do item" />
        <!--get 请求方式时,测试无法通过,此时csrf_token渲染不了模板里面-->
        {% csrf_token %}
+     </p>
     </form>
 </body>
 </html>
