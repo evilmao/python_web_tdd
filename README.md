@@ -119,3 +119,20 @@ python web 驱动测试代码demo及各章知识点
 ### 7.4 使用bootstrap中的组件改进网站外观.
 
 1. 使用jumbotron用于特别突出地显示页面中的元素.
+
+### 7.5 collectstatic命令和其他静态目录
+
+1. 在真正的 Web 服务器中，并不需要让 Django 伺服静态内容，因为使用 Python 伺服原始文件速度慢而且效率低，Apache、Nginx 等 Web 服务器能更好 地完成这项任务
+2. 如果项目中有多个app, 每个app下都有自己独立的静态文件,要把分散在各个应用文件夹中的所有静态文件集中起来，复制一份放在一个位 置，为部署做好准备。collectstatic 命令的作用就是完成这项操作。
+3. 静态文件集中放置的位置由 `settings.py` 中的 `STATIC_ROOT` 定义
+
+    settings.py
+    ```python
+    ...
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    ...
+    STATIC_URL = '/static/'
+    STATIC_ROOT = os.path.abspath(os.path.join(BASE_DIR, '../static'))
+    ```
+4. 执行指令: `python3 manage.py collectstatic`
+
