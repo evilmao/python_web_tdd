@@ -111,3 +111,11 @@ python web 驱动测试代码demo及各章知识点
     {% endblock %}
     ```
 3. 模板继承使用 `{% extends 'xx.html' %}`
+
+> 注意: 原书中说明"虽 然 runserver 启 动 的 开 发 服 务 器 能 自 动 找 到 静 态 文 件， 但 LiveServerTestCase 找不到。" 再使用django 2.1.7版本中发现并未发现此问题.所以此处代码未做修改.
+
+
+
+### 7.4 使用bootstrap中的组件改进网站外观.
+
+1. 使用jumbotron用于特别突出地显示页面中的元素.
