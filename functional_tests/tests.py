@@ -21,6 +21,7 @@ class NewVisitorTest(LiveServerTestCase):
         self.home_page_url = 'http://localhost:8000/lists/'
 
     def tearDown(self):
+        self.browser.refresh()
         self.browser.quit()
 
     def check_for_row_in_list_table(self,row_text):
@@ -88,6 +89,7 @@ class NewVisitorTest(LiveServerTestCase):
 
         ## 我们使用一个新浏览器会话
         ## 确保allen的信息不会从cookie中泄露出来 #➊
+        self.browser.refresh()
         self.browser.quit()
         self.browser = webdriver.Chrome(chrome_options=options)
 
@@ -115,7 +117,7 @@ class NewVisitorTest(LiveServerTestCase):
         self.assertIn('Buy milk', page_text)
 
         # 两人都很满意，去睡觉了
-        self.fail()
+        # self.fail()
 
 
 # if __name__ == '__main__':  # ➐
