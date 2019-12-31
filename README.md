@@ -101,7 +101,9 @@ failyh@server:$
     ![](../superlists/doc/img/Godaddy_domain_1.png)
 
 
-5. 进入freenom页面: https://my.freenom.com/clientarea.php,登录后
+5. 进入freenom页面: https://my.freenom.com/clientarea.php
+
+   登录后
 
    依次 `Services-->My Domains--> Manage Domain`
 
@@ -168,6 +170,19 @@ failyh@server:$
 1. setting中设置DATABASES路径
 2. 项目下新建目录: `mkdir database`
 3. 执行新的数据库迁移: `python manage.py migrate --noinput`
+
+借助代码托管网站将代码上传到服务器: `gitlab`, `github`, `码云`...
+
+1. 为网站新建独立的文件夹:
+    ``` shell
+    faily@server:$ export SITENAME=failytodo-superlist.tk
+    faily@server:$ mkdir -p ~/sites/$SITENAME/database
+    faily@server:$ mkdir -p ~/sites/$SITENAME/static
+    faily@server:$ mkdir -p ~/sites/$SITENAME/virtualenv
+    ```
+2. 将代码拉取至服务器:
+    `git clone `
+
 
 
 
