@@ -3,8 +3,10 @@
 '''
 functional test: 功能测试
 '''
-import unittest
+
+import sys
 from django.test import  LiveServerTestCase
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 
@@ -12,8 +14,25 @@ options = webdriver.ChromeOptions()
 options.binary_location = "D:\soft\Google\Chrome\Application\chrome.exe"
 
 
-class NewVisitorTest(LiveServerTestCase):
+class NewVisitorTest(StaticLiveServerTestCase):
     """使用LiveServerTestCase 隔离测试"""
+
+    @classmethod
+    def setUpClass(cls):
+        # cls.browser = webdriver.Chrome(chrome_options=options)
+        # cls.browser.implicitly_wait(3)  # 隐式等待几秒,以便页面加载完成
+        for arg in sys.argv:
+            if 'liveserver' in arg:
+                cls.server_url = 'http://' + arg.split("=")[1]
+                return
+        super().setUpClass()
+        cls.server_url = 'http://localhost:8000/lists/'
+
+
+    @classmethod
+    def tearDownClass(cls):
+        if cls.server_url == 'http://localhost:8000/lists/':
+            super().tearDownClass()
 
     def setUp(self):
         self.browser = webdriver.Chrome(chrome_options=options)
@@ -32,7 +51,7 @@ class NewVisitorTest(LiveServerTestCase):
 
     def test_layout_and_styling(self):
         # allen访问首页
-        self.browser.get(self.home_page_url)
+        self.browser.get(self.server_url)
         self.browser.set_window_size(1024,768)  # 设置浏览器窗口的位置
 
         # 他看到输入框完美地居中显示
@@ -46,8 +65,8 @@ class NewVisitorTest(LiveServerTestCase):
     def test_can_start_a_list_and_retrieve_it_later(self):
         # allen听说有一个很酷的在线待办事项应用
         # 她去看了这个应用的首页
-        home_page_url = 'http://localhost:8000/lists/'
-        self.browser.get(home_page_url)
+        # home_page_url = 'http://localhost:8000/lists/'
+        self.browser.get(self.server_url)
         # self.browser.get(self.live_server_url)
 
         # 她注意到网页的标题和头部都包含“To-Do”这个词
@@ -95,7 +114,7 @@ class NewVisitorTest(LiveServerTestCase):
 
         # 费力访问首页
         # 页面中看不像allen的清单
-        self.browser.get(home_page_url)
+        self.browser.get(self.server_url)
         page_text = self.browser.find_element_by_tag_name('body').text
         self.assertNotIn('Buy peacock feathers', page_text)
         self.assertNotIn('make a fly', page_text)
