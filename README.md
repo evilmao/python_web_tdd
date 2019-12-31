@@ -181,7 +181,56 @@ failyh@server:$
     faily@server:$ mkdir -p ~/sites/$SITENAME/virtualenv
     ```
 2. 将代码拉取至服务器:
-    `git clone `
+    `git clone https://github.com/evilmao/python_web_tdd.git`
+
+3. 配置相同的虚拟环境: 使用 virtualenv 注意相对路径,参考项目结构
+
+4. 安装依赖包: `pip install  -i https://pypi.tuna.tsinghua.edu.cn/simple  -r requirements.txt`
+
+5. 运行测试: `python manage.py test lists`
+
+#### 8.5.3 简单配置Nginx
+1. 为每一个单独的应用新建一个独立的配置文件, 配置文件统一放在
+    `/etc/nginx/conf.d/`
+2. 编写如下配置:
+    ```yaml
+    server {
+        listen 80;
+        server_name failytodo-superlist.tk;
+
+        location / {
+            proxy_pass http://localhost:8000;
+        }
+    }
+    ```
+
+### 8.6 生产环境部署
+Django自带的服务器为wsgi, 效率低下. 使用gunicorn可以很好的解决多用户访问性能问题.
+
+#### 8.6.1 使用gunicorn 启动服务
+1. 安装: `pip install gunicorn`
+2. 运行: `../virtualenv/bin/gunicorn superlist.wsgi:application`
+
+#### 8.6.2 nginx伺服静态文件
+
+1. 使用`collectstatic`命令，把所有静态文件复制到一个 Nginx 能找到的文件夹中
+2. 指令 :`../virtualenv/bin/python manage.py collectstatic --noinput`
+3. 修改nginx配置:
+    ```shell
+    server {
+        listen 80;
+        server_name failytodo-superlist.tk;
+
+        location / {
+            proxy_pass http://localhost:8000;
+        }
+
+        location /static {
+            alias /home/faily/sites/failytodo-superlist.tk/static;
+        }
+    }
+    ```
+
 
 
 
