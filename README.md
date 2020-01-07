@@ -230,6 +230,73 @@ Django自带的服务器为wsgi, 效率低下. 使用gunicorn可以很好的解�
         }
     }
     ```
+4. 重启nginx 和gunicorn:
+    - `systemctl reload nginx`
+    - `../virtualenv/bin/gunicorn superlists.wsgi:application`
+
+#### 8.6.3 换用unix套接字
+1. 什么是unix套接字?
+    - UNIX域套接字用于在同一台机器上运行的进程之间的通信。
+    - 域套接字类似于硬盘中的文件，不过还可以用来处理 Nginx 和 Gunicorn 之间的通信
+2. 为什么使用UNIX套接字?
+    - 如果想要同时伺服测试网站和线上网站，这两个网站就不能共用 8000 端口。可以为不同 网站分配不同端口，但这么做有点儿随意，而且很容易出错，万一在线上网站的端口上启 动过渡服务器（或者反过来）怎么办。
+3. 在nginx中配置套接字
+    ```shell
+    [...]
+    location / {
+        proxy_set_header Host $host;
+        proxy_pass http://unix:/tmp/failytodo-superlist.tk.socket;
+    }
+    ```
+
+    - proxy_set_header 的作用是让 Gunicorn 和 Django 知道它们运行在哪个域名下
+4. 重新启动项目:
+    - `../virtualenv/bin/gunicorn --bind  unix:/tmp/failytodo-superlist.tk.socket superlists.wsgi:application`
+
+#### 8.6.4 生产环境下,取消DEBUG模式,设置设置ALLOWED_HOSTS
+1. 在 settings.py 的中设置debug,如下
+    ``` python
+    # 安全警告：别在生产环境中开启调试模式！ DEBUG = False
+
+    TEMPLATE_DEBUG = DEBUG
+
+    # DEBUG=False时需要这项设置
+    ALLOWED_HOSTS = ['failytodo-superlist.tk']
+    [...]
+    ```
+2. 然后重启 Gunicorn，再运行功能测试，确保一切正常。
+
+#### 8.6.5 使用Upstart确保引导时启动Gunicorn
+1. 安装upstart(centos7 已弃用, 使用systemd)
+    - yum install
+    - 更多system启动服务参考 [system配置服务](https://www.evernote.com/l/AfELhQc-m8RD1J5ExPTne_VsU0sL0OTTPZY/)
+2. 确保服务器引导时自动启动 Gunicorn，如果 Gunicorn 崩溃了还要自动重启
+
+### 8.7 自动化
+
+总结一下配置和部署的过程。
+
+- 配置
+    1. 假设有用户账户和家目录；
+    2. apt-get nginx git python-pip；
+    3. pip install virtualenv；
+    4.  添加 Nginx 虚拟主机配置；
+    5. 添加 systemd/upstart 任务，自动启动 Gunicorn。
+- 部署
+    1. 在 ~/sites 中创建目录结构；
+    2. 拉取源码，保存到 source 文件夹中；
+    3. 启用 ../virtualenv 中的虚拟环境；
+    4. pip install -r requirements.txt；
+    5. 执行 manage.py migrate，创建数据库；
+    6. 执行 collectstatic 命令，收集静态文件；
+    7. 在 settings.py 中设置 DEBUG = False 和 ALLOWED_HOSTS；
+    8. 重启 Gunicorn；
+    9. 运行功能测试，确保一切正常。
+
+2. 配置重用
+将nginx及upstart(systemd)服务文件保存方便后续使用
+
+
 
 
 
