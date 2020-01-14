@@ -70,4 +70,36 @@ Fabric需要依赖pycrypto.所以也需要安装pycrypto
     - `systectl reload nginx`
     - `start gunicorn-failytodo-superlist.tk`
 
+### 使用Git标签标注发布状态
+
+为了保留历史标记，使用 Git 标签（tag）标注代码库的状态，指明服务器中当前使用的是哪个版本：
+1. 执行以下指令
+    ``` python
+    $ git tag LIVE
+    $ export TAG=`date +DEPLOYED-%F/%H%M` # 生成一个时间戳
+    $ echo $TAG                           # 会显示“DEPLOYED-”和时间戳
+    $ git tag $TAG                        # 生成一个标签
+    $ git push origin LIVE $TAG           # 推送标签到远程仓库
+    ```
+2. 查看历史标签
+    `git log --graph --oneline --decorate`
+
+
+### 总结-自动部署
+
+- Fabric
+
+    Fabric 允许在 Python 脚本中编写可在服务器中执行的命令。这个工具很适合自动执 行服务器管理任务。
+- 幂等
+
+    如果部署脚本要在已经配置的服务器中运行，就要把它设计成既可在全新的服务器 中运行，又能在已经配置的服务器中运行。
+• 把配置文件纳入版本控制
+
+    一定不能只在服务器中保存一份配置文件副本。配置文件对应用来说非常重要，应 该和其他文件一样纳入版本控制。
+- 自动配置
+
+    最终，所有操作都要实现自动化，包括配置全新的服务器和安装所需的全部正确软 件。配置的过程中会和主机供应商的 API 交互。
+• 配置管理工具
+
+    Fabric 很灵活，但其逻辑还是基于脚本的。高级工具使用声明式的方法，用起来更 方便。Ansible和Vagrant都值得一试（参见附录 C），此外还有很多同类工具，例如Chef、Puppet、Salt和Juju 等
 
